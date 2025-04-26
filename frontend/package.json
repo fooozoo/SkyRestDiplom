@@ -1,0 +1,27 @@
+{
+  "name": "SkyRest-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for SkyRest",
+  "private": true,
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "bcrypt": "^5.1.1",
+    "express-validator": "^7.2.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.2",
+    "eslint-plugin-react": "^7.37.4",
+    "prettier": "^3.5.3",
+    "vite": "^6.2.0"
+  }
+}
