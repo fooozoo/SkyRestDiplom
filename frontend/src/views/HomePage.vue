@@ -2,46 +2,50 @@
   <div>
     <section class="hero-section">
       <div class="container">
-        <h1>Добро пожаловать в SkyRest</h1>
-        <p>Насладитесь изысканной кухней с панорамным видом на город.</p>
-        <a href="/reservations" class="cta-button">Забронировать столик</a>
+        <h1>Ласкаво просимо до SkyRest</h1>
+        <p>Насолоджуйтесь вишуканою кухнею з панорамним видом на місто.</p>
+        <router-link to="/reservations" class="cta-button"
+          >Забронювати столик</router-link
+        >
       </div>
     </section>
 
     <section class="content-section">
       <div class="container">
-        <h2>О Ресторане</h2>
+        <h2>Про Ресторан</h2>
         <p>
-          SkyRest - это уникальное место, где высокая кухня встречается с
-          захватывающими видами. Мы предлагаем...
+          SkyRest - це унікальне місце, де висока кухня зустрічається із
+          захоплюючими краєвидами. Ми пропонуємо...
         </p>
       </div>
     </section>
+
     <section class="content-section" style="background-color: #e9ecef">
       <div class="container">
-        <h2>Популярные блюда</h2>
-        <p>
-          Здесь будут карточки с изображениями и описаниями нескольких блюд...
-        </p>
+        <h2>Популярні страви</h2>
+        <p>Тут будуть картки із зображеннями та описами декількох страв...</p>
         <div style="text-align: center; margin-top: 2rem">
-          <a
-            href="/menu"
+          <router-link
+            to="/menu"
             class="cta-button"
             style="background-color: #0a192f; color: #64ffda"
-            >Смотреть все меню</a
+            >Дивитися все меню</router-link
           >
         </div>
       </div>
     </section>
+
     <section class="content-section">
       <div class="container">
-        <h2>Свяжитесь с нами</h2>
+        <h2>Зв'яжіться з нами</h2>
         <p>
-          Забронируйте столик онлайн или позвоните нам. Мы находимся по
-          адресу...
+          Забронюйте столик онлайн або зателефонуйте нам. Ми знаходимося за
+          адресою...
         </p>
         <div style="text-align: center; margin-top: 2rem">
-          <a href="/reservations" class="cta-button">Резервация онлайн</a>
+          <router-link to="/reservations" class="cta-button"
+            >Резервація онлайн</router-link
+          >
         </div>
       </div>
     </section>
@@ -49,15 +53,9 @@
 </template>
 
 <script setup>
-// Логика для главной страницы (если нужна)
-// Например, загрузка популярных блюд
+// Скриптова частина залишається без змін
 </script>
 
 <style scoped>
-/* Стили, специфичные только для HomeView (если нужны) */
-h1,
-h2 {
-  /* Пример локального стиля, если хочешь переопределить index.css */
-  /* color: navy; */
-}
+/* Стилі залишаються без змін */
 </style>
