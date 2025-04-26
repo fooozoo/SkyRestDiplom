@@ -1,10 +1,10 @@
 <template>
   <footer class="footer">
     <div class="container">
-      <p>&copy; {{ currentYear }} SkyRest. Все права защищены.</p>
-      <p>Адрес: г. Город, ул. Небесная, 1 | Телефон: +123 456 7890</p>
+      <p>&copy; {{ currentYear }} SkyRest. Всі права захищені .</p>
+      <p>Адрес: г. Обухів, вул. Київська, 1 | Телефон: +123 456 7890</p>
       <p>
-        Разработано с
+        Розроблено
         <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer"
           >Vue.js</a
         >
