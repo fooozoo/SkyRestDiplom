@@ -1,0 +1,142 @@
+/* Сброс стилей и базовые настройки */
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif; /* Используем подключенный шрифт */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #f8f9fa; /* Светлый фон для страницы */
+    color: #212529; /* Основной цвет текста */
+    line-height: 1.6;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex-grow: 1; /* Основной контент занимает все доступное место */
+}
+
+/* Убираем стандартные стили для списков и ссылок */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit; /* Наследовать цвет от родителя */
+}
+
+/* Общий контейнер для ограничения ширины контента */
+.container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Стили для Navbar (пример) */
+.navbar {
+    background-color: #0a192f; /* Темно-синий */
+    color: #ccd6f6; /* Светлый текст */
+    padding: 1rem 0;
+    border-bottom: 1px solid #1b2f4e;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #64ffda; /* Акцентный цвет (пример) */
+}
+
+.navbar-links ul {
+    display: flex;
+}
+
+.navbar-links li {
+    margin-left: 1.5rem;
+}
+
+.navbar-links a {
+    color: #ccd6f6;
+    transition: color 0.3s ease;
+}
+
+.navbar-links a:hover {
+    color: #64ffda; /* Акцентный цвет при наведении */
+}
+
+/* Стили для Hero секции (пример) */
+.hero-section {
+    background-color: #112240; /* Чуть светлее навбара */
+    color: #ccd6f6;
+    padding: 6rem 0;
+    text-align: center;
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #a8b2d1;
+}
+
+.cta-button {
+    background-color: #64ffda; /* Акцентный цвет */
+    color: #0a192f; /* Темный текст на кнопке */
+    padding: 0.8rem 1.8rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: #52d8c1;
+}
+
+/* Стили для других секций (просто пример) */
+.content-section {
+    padding: 4rem 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.content-section h2 {
+    text-align: center;
+    margin-bottom: 3rem;
+    font-size: 2.2rem;
+    color: #0a192f;
+}
+
+/* Стили для Footer (пример) */
+.footer {
+    background-color: #0a192f; /* Темно-синий */
+    color: #a8b2d1; /* Приглушенный светлый текст */
+    padding: 2rem 0;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.footer a {
+    color: #64ffda;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
