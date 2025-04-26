@@ -80,30 +80,30 @@ const handleSuccessfulLogin = ({ token, user }, isRegistration = false) => {
   isLoggedIn.value = true;
 
   if (token) {
-    // Зберігаємо токен в localStorage (не дуже безпечно для продакшна!)
     localStorage.setItem("authToken", token);
-    // В реальному додатку: налаштувати axios для автоматичної відправки токена
+    // ---> ДОБАВЬ ЭТУ СТРОКУ <---
+    localStorage.setItem("currentUser", JSON.stringify(user)); // Сохраняем объект user как JSON-строку
+    // ---> КОНЕЦ ДОБАВЛЕННОЙ СТРОКИ <---
   }
 
   closeLoginModal();
-  closeRegisterModal(); // Закриваємо обидва вікна про всяк випадок
+  closeRegisterModal();
 
-  // Перенаправляємо на профіль
-  // Затримка потрібна лише якщо це була реєстрація, щоб користувач побачив успіх
-  const redirectDelay = isRegistration ? 500 : 0; // Затримка 0.5 сек після реєстрації
+  const redirectDelay = isRegistration ? 500 : 0;
   setTimeout(() => {
     router.push({ name: "Profile", params: { id: user.id } });
   }, redirectDelay);
 };
+
 //ФУНКЦІЯ ВИХОДУ
 const handleLogout = () => {
   console.log("Logging out...");
-  // Скидаємо стан автентифікації
   isLoggedIn.value = false;
   currentUser.value = null;
-  // В реальному додатку: очистити токен з localStorage/sessionStorage,
-  // можливо, відправити запит на бекенд для інвалідації сесії/токену
-  // Перенаправляємо на головну сторінку
+  localStorage.removeItem("authToken");
+  // ---> ДОБАВЬ ЭТУ СТРОКУ <---
+  localStorage.removeItem("currentUser"); // Удаляем данные пользователя при выходе
+  // ---> КОНЕЦ ДОБАВЛЕННОЙ СТРОКИ <---
   router.push({ name: "Home" });
 };
 // Щоб користувач залишався залогіненим після оновлення сторінки

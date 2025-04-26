@@ -42,26 +42,74 @@ const router = createRouter({
     }
   },
 });
-router.beforeEach((to, from, next) => {
-  // Перевіряємо, чи є токен в localStorage (наш спрощений спосіб перевірки "залогіненості")
-  const isAuthenticated = !!localStorage.getItem("authToken"); // !! перетворює значення на boolean
 
-  // Перевіряємо, чи маршрут, на який йде перехід (`to`), потребує автентифікації
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
-    // Якщо маршрут потребує входу, А користувач НЕ залогінений
-    if (!isAuthenticated) {
-      // Перенаправляємо на головну сторінку
-      console.log(
-        "Navigation Guard: User not authenticated, redirecting to Home",
-      );
-      next({ name: "Home" }); // Або на сторінку логіну, якби вона була окремим маршрутом: next({ name: 'Login' })
-    } else {
-      // Якщо маршрут потребує входу, І користувач залогінений - дозволяємо перехід
+router.beforeEach((to, from, next) => {
+  // ---> ИЗМЕНИ const НА let ЗДЕСЬ <---
+  let isAuthenticated = !!localStorage.getItem("authToken"); // Используем let вместо const
+
+  let loggedInUserId = null;
+  const storedUser = localStorage.getItem("currentUser");
+
+  if (storedUser) {
+    try {
+      const parsedUser = JSON.parse(storedUser);
+      loggedInUserId = parsedUser?.id;
+      if (!loggedInUserId) {
+        // Если ID не найден после парсинга
+        throw new Error("Parsed user data lacks ID");
+      }
+    } catch (e) {
+      console.error("Failed to parse user data or ID missing:", e);
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("currentUser");
+      isAuthenticated = false; // Теперь это присваивание корректно
+    }
+  } else if (isAuthenticated) {
+    // Если есть токен, но нет данных пользователя - неконсистентное состояние
+    console.warn(
+      "Auth token found but user data missing in localStorage. Clearing token.",
+    );
+    localStorage.removeItem("authToken");
+    isAuthenticated = false; // Теперь это присваивание корректно
+  }
+
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+
+  if (requiresAuth && !isAuthenticated) {
+    // Случай 1: Маршрут требует входа, но пользователь НЕ залогинен (нет токена или данные повреждены)
+    console.log(
+      "Navigation Guard: User not authenticated, redirecting to Home",
+    );
+    next({ name: "Home" }); // Перенаправляем на главную
+  } else if (requiresAuth && isAuthenticated && to.name === "Profile") {
+    // Случай 2: Маршрут требует входа, пользователь залогинен, И это маршрут 'Profile'
+    const requestedProfileId = to.params.id; // ID профиля из URL
+
+    if (
+      loggedInUserId &&
+      requestedProfileId &&
+      loggedInUserId.toString() === requestedProfileId.toString()
+    ) {
+      // ID залогиненного пользователя совпадает с ID в URL - разрешаем доступ
       next();
+    } else {
+      // ID не совпадают ИЛИ не удалось получить ID залогиненного пользователя - запрещаем доступ к чужому профилю
+      console.log(
+        `Navigation Guard: User ${loggedInUserId} forbidden to access profile ${requestedProfileId}. Redirecting.`,
+      );
+      // Перенаправляем пользователя на ЕГО СОБСТВЕННЫЙ профиль (если ID известен) или на главную
+      if (loggedInUserId) {
+        next({ name: "Profile", params: { id: loggedInUserId } });
+      } else {
+        next({ name: "Home" }); // Если что-то пошло не так с ID залогиненного юзера
+      }
     }
   } else {
-    // Якщо маршрут НЕ потребує входу - завжди дозволяємо перехід
+    // Случай 3: Маршрут не требует входа ИЛИ требует, и пользователь залогинен (но это не /profile/:id)
+    // Просто разрешаем навигацию
     next();
   }
 });
-export default router; // Експортуємо маршрутизатор для використання у main.js
+// ---> КОНЕЦ ОБНОВЛЕНИЯ ОХРАННИКА <---
+
+export default router;

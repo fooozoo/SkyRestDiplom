@@ -9,7 +9,6 @@
         </p>
         <p>Ваш ID: {{ userData.id }}</p>
         <p>Ваш Email: {{ userData.email }}</p>
-        {/* Тут можна додати іншу інформацію профілю */}
       </div>
       <div v-else-if="loading">
         <p>Завантаження даних профілю...</p>
