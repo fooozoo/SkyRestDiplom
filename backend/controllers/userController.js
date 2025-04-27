@@ -18,7 +18,7 @@ const getUserProfile = async (req, res) => {
       connection = await pool.getConnection();
       // Получаем актуальные данные из БД
       const [users] = await connection.query(
-        "SELECT id, username, email, created_at FROM users WHERE id = ?",
+        "SELECT id, username, email, created_at, avatar_url FROM users WHERE id = ?",
         [userId],
       );
 

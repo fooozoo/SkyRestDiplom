@@ -77,19 +77,23 @@
   </div>
 </template>
 
+<
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import axios from "axios";
-import defaultAvatar from "../assets/default-avatar.png";
+// Импортируем стандартный аватар (положи его в src/assets) или укажи путь
+import defaultAvatar from "../assets/default-avatar.png"; // <--- ПРИМЕР
 
 const profileData = ref(null);
-const isLoading = ref(false);
-const errorMessage = ref("");
+const isLoading = ref(false); // Загрузка данных профиля
+const errorMessage = ref(""); // Ошибка загрузки данных профиля
 
+// ---> НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ЗАГРУЗКИ АВАТАРА <---
 const fileInput = ref(null); // Ссылка на <input type="file">
 const selectedFile = ref(null); // Выбранный файл
 const uploadingAvatar = ref(false); // Идет ли загрузка аватара?
 const uploadError = ref(""); // Ошибка загрузки аватара
+// ---> КОНЕЦ НОВЫХ ПЕРЕМЕННЫХ <---
 
 // Функция форматирования даты (без изменений)
 const formatDateTime = (dateString) => {
@@ -134,6 +138,7 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+// Вызывает клик по скрытому инпуту файла
 const triggerFileInput = () => {
   // Очищаем предыдущую ошибку загрузки, если была
   uploadError.value = "";
@@ -212,6 +217,8 @@ const uploadAvatar = async () => {
     uploadingAvatar.value = false;
   }
 };
+
+// ---> КІНЕЦЬ НОВИХ ФУНКЦІЙ <---
 </script>
 
 <style scoped>
