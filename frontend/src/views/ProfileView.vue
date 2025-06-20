@@ -255,7 +255,9 @@ const fetchMyOrders = async () => {
   isLoadingOrders.value = true;
   loadOrdersError.value = "";
   try {
-    const response = await axios.get("http://localhost:5000/api/orders/my");
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/orders/my`,
+    );
     userOrders.value = response.data;
     console.log("User orders fetched:", userOrders.value.length);
   } catch (error) {
@@ -285,7 +287,9 @@ onMounted(async () => {
   isLoading.value = true;
   errorMessage.value = "";
   try {
-    const response = await axios.get("http://localhost:5000/api/users/me");
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/users/me`,
+    );
     profileData.value = response.data;
   } catch (error) {
     console.error("Failed to fetch profile data in ProfileView:", error);
@@ -340,7 +344,7 @@ const uploadAvatar = async () => {
   formData.append("avatar", selectedFile.value);
 
   try {
-    const apiUrl = "http://localhost:5000/api/users/avatar";
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/users/avatar`;
     const response = await axios.post(apiUrl, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
@@ -372,7 +376,7 @@ const fetchMyReservations = async () => {
   loadReservationsError.value = "";
   try {
     const response = await axios.get(
-      "http://localhost:5000/api/reservations/my",
+      `${import.meta.env.VITE_API_URL}/api/reservations/my`,
     );
     userReservations.value = response.data;
     console.log("User reservations fetched:", userReservations.value.length);

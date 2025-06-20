@@ -208,7 +208,9 @@ const fetchAllTables = async () => {
   isLoadingTables.value = true;
   error.value = null;
   try {
-    const response = await axios.get("http://localhost:5000/api/tables");
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/tables`,
+    );
     allTables.value = response.data.map((table) => ({
       ...table,
       is_available: true,
@@ -245,7 +247,7 @@ const fetchAvailability = async () => {
     try {
       const params = { date: selectedDate.value, time: selectedTime.value };
       const response = await axios.get(
-        "http://localhost:5000/api/tables/availability",
+        `${import.meta.env.VITE_API_URL}/api/tables/availability`,
         { params },
       );
       const availabilityData = response.data;
@@ -328,7 +330,7 @@ const makeReservation = async () => {
   console.log("Submitting reservation:", reservationData);
 
   try {
-    const apiUrl = "http://localhost:5000/api/reservations";
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/reservations`;
     const response = await axios.post(apiUrl, reservationData);
 
     console.log("Reservation successful:", response.data);

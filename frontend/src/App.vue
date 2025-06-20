@@ -104,7 +104,10 @@ async function fetchAndSetUser() {
   }
   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   try {
-    const response = await axios.get("http://localhost:5000/api/users/me");
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/users/me`,
+    );
+    currentUser.value = response.data;
     currentUser.value = response.data;
     isLoggedIn.value = true;
     console.log(
@@ -220,7 +223,9 @@ onMounted(async () => {
     axios.defaults.headers.common["Authorization"] =
       `Bearer ${tokenFromStorage}`;
     try {
-      const response = await axios.get("http://localhost:5000/api/users/me");
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/users/me`,
+      );
       currentUser.value = response.data;
       isLoggedIn.value = true;
       if (storedUserStr) {

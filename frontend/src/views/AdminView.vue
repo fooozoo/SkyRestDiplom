@@ -226,7 +226,8 @@ const fetchExistingItems = async () => {
   isLoadingItems.value = true;
   loadItemsError.value = "";
   try {
-    const response = await axios.get("http://localhost:5000/api/menu");
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/menu`;
+    const response = await axios.get(apiUrl);
     existingItems.value = response.data;
     console.log("Existing menu items fetched:", existingItems.value.length);
   } catch (error) {
@@ -250,7 +251,7 @@ const confirmDeletion = async () => {
   showConfirmModal.value = false;
 
   try {
-    const apiUrl = `http://localhost:5000/api/menu/${id}`;
+    const apiUrl = `<span class="math-inline">\{import\.meta\.env\.VITE\_API\_URL\}/api/menu/</span>{id}`;
     await axios.delete(apiUrl);
     showToast(`Страва "${name}" видалена.`, "success");
     existingItems.value = existingItems.value.filter((item) => item.id !== id);
@@ -349,7 +350,7 @@ const handleSubmitItem = async () => {
 
     if (editItemId.value) {
       console.log(`Submitting UPDATE for item ID: ${editItemId.value}`);
-      const apiUrl = `http://localhost:5000/api/menu/${editItemId.value}`;
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/menu/${editItemId.value}`;
       response = await axios.put(apiUrl, formData, { headers });
       formSuccess.value = response.data.message || "Блюдо успішно оновлено!";
 
@@ -365,7 +366,7 @@ const handleSubmitItem = async () => {
       cancelEdit();
     } else {
       console.log(`Submitting CREATE for new item`);
-      const apiUrl = "http://localhost:5000/api/menu";
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/menu`;
       response = await axios.post(apiUrl, formData, { headers });
       formSuccess.value = response.data.message || "Блюдо успішно додано!";
       if (response.data.item) {

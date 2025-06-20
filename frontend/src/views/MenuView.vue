@@ -140,7 +140,7 @@ const fetchMenuItems = async () => {
   isLoading.value = true;
   error.value = null;
   try {
-    const apiUrl = "http://localhost:5000/api/menu";
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/menu`;
     const response = await axios.get(apiUrl);
     menuItems.value = response.data;
     console.log("Menu items fetched:", menuItems.value);

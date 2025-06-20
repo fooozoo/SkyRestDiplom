@@ -64,7 +64,7 @@ const handleLogin = async () => {
   errorMessage.value = "";
 
   try {
-    const apiUrl = "http://localhost:5000/api/auth/login";
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/auth/login`;
     const response = await axios.post(apiUrl, {
       username: username.value,
       password: password.value,

@@ -69,7 +69,7 @@ const handleRegister = async () => {
   errorMessage.value = "";
 
   try {
-    const apiUrl = "http://localhost:5000/api/auth/register";
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/auth/register`;
     const response = await axios.post(apiUrl, {
       username: username.value,
       email: email.value,

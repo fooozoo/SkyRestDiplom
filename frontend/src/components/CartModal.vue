@@ -273,7 +273,7 @@ const placeOrder = async () => {
 
   // 5. Відправка запиту на бекенд
   try {
-    const apiUrl = "http://localhost:5000/api/orders";
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/orders`;
     const response = await axios.post(apiUrl, orderPayload);
 
     console.log("Order placed successfully:", response.data);
