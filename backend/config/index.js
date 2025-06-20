@@ -6,19 +6,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.resolve(__dirname, "../.env");
 
-console.log(`--- DEBUG [config/index.js]: Загружаю .env из ${envPath} ---`);
+console.log(``);
 const dotenvResult = dotenv.config({ path: envPath });
 
 if (dotenvResult.error) {
-  console.error(
-    "--- DEBUG [config/index.js]: Ошибка загрузки .env:",
-    dotenvResult.error,
-  );
+  console.error(" ", dotenvResult.error);
 } else {
-  console.log(
-    `--- DEBUG [config/index.js]: .env загружен. process.env.DB_PORT =`,
-    process.env.DB_PORT,
-  );
+  console.log(``, process.env.DB_PORT);
 }
 
 export default {
