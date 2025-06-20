@@ -39,26 +39,22 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
-// Отримуємо пропс 'isOpen' від батьківського компонента
 const props = defineProps({
   isOpen: {
     type: Boolean,
     required: true,
   },
 });
-// Визначаємо подію 'close', яку відправляємо батькам
 const emit = defineEmits(["close", "registration-success"]);
 
 // Змінні для стану запиту та повідомлень
-const isLoading = ref(false); // Чи йде запит?
-const errorMessage = ref(""); // Повідомлення про помилку
-
+const isLoading = ref(false);
+const errorMessage = ref("");
 const username = ref("");
 const email = ref("");
 const password = ref("");
 
 const closeModal = () => {
-  // Скидаємо стан при закритті
   username.value = "";
   email.value = "";
   password.value = "";
@@ -69,24 +65,19 @@ const closeModal = () => {
 
 // Функція реєстрації з відправкою на бекенд
 const handleRegister = async () => {
-  isLoading.value = true; // Починаємо завантаження
-  errorMessage.value = ""; // Скидаємо попередні помилки
+  isLoading.value = true;
+  errorMessage.value = "";
 
   try {
-    // Переконайся, що порт 5000 правильний для твого бекенду
-    const apiUrl = "http://localhost:5000/api/auth/register"; // Або інший порт
-    // Відправляємо POST-запит з даними форми
+    const apiUrl = "http://localhost:5000/api/auth/register";
     const response = await axios.post(apiUrl, {
       username: username.value,
       email: email.value,
       password: password.value,
     });
 
-    // Успішна реєстрація
     console.log("Registration successful, emitting data:", response.data.user);
-    // Відправляємо подію батьківському компоненту з даними користувача
     emit("registration-success", response.data.user);
-    // Очистимо форму (або закриємо вікно через деякий час)
     username.value = "";
     email.value = "";
     password.value = "";
@@ -95,7 +86,6 @@ const handleRegister = async () => {
     if (error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message;
     } else if (error.response?.data?.errors) {
-      // Скорочений запис
       const firstError = error.response.data.errors[0];
       const errorKey = Object.keys(firstError)[0];
       errorMessage.value = firstError[errorKey];
@@ -107,35 +97,35 @@ const handleRegister = async () => {
   }
 };
 const switchToLogin = () => {
-  closeModal(); // Закриваємо вікно логіну
-  emit("open-login"); // Просимо App.vue відкрити вікно реєстрації
+  closeModal();
+  emit("open-login");
 };
 </script>
 
 <style scoped>
 .modal-overlay {
-  position: fixed; /* Фіксована позиція відносно вікна браузера */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Напівпрозорий темний фон */
-  display: flex; /* Використовуємо flex для центрування */
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Поверх інших елементів */
+  z-index: 1000;
 }
 
 .modal-container {
-  background-color: #ffffff; /* Білий фон для вікна */
+  background-color: #ffffff;
   padding: 2rem 2.5rem;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  min-width: 300px; /* Мінімальна ширина */
-  max-width: 500px; /* Максимальна ширина */
-  width: 90%; /* Ширина відносно батька */
-  position: relative; /* Для позиціонування кнопки закриття */
-  color: #212529; /* Темний текст всередині модалки */
+  min-width: 300px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  color: #212529;
 }
 
 .modal-close-button {
@@ -157,7 +147,7 @@ const switchToLogin = () => {
 .modal-content h2 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #0a192f; /* Темно-синій заголовок */
+  color: #0a192f;
   text-align: center;
 }
 .modal-content p {
@@ -167,7 +157,6 @@ const switchToLogin = () => {
   color: #495057;
 }
 
-/* Стилі для форми всередині модального вікна */
 .form-group {
   margin-bottom: 1rem;
 }
@@ -197,26 +186,24 @@ const switchToLogin = () => {
 }
 
 .cta-button {
-  /* Можна перевизначити стилі кнопки */
   width: 100%;
   margin-top: 0.5rem;
 }
 
 .modal-content a {
-  color: #007bff; /* Стандартний синій для посилань */
+  color: #007bff;
   text-decoration: underline;
   cursor: pointer;
 }
-/* Стилі для повідомлень про помилку/успіх */
 .error-message {
-  color: #dc3545; /* Червоний */
+  color: #dc3545;
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
   padding: 0.75rem 1.25rem;
   margin-bottom: 1rem;
   border-radius: 0.25rem;
   text-align: center;
-  font-size: 0.9em !important; /* Зменшимо шрифт і зробимо важливим */
+  font-size: 0.9em !important;
 }
 
 .success-message {

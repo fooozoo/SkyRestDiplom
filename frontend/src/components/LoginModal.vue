@@ -44,7 +44,6 @@ import { ref } from "vue";
 import axios from "axios";
 
 const props = defineProps({ isOpen: { type: Boolean, required: true } });
-// Потрібно емітувати 'close', 'login-success', та 'open-register'
 const emit = defineEmits(["close", "login-success", "open-register"]);
 
 const username = ref("");
@@ -77,7 +76,7 @@ const handleLogin = async () => {
       token: response.data.token,
       user: response.data.user,
     });
-    closeModal(); // Закриваємо вікно логіну
+    closeModal();
   } catch (error) {
     console.error("Login failed:", error);
     if (error.response && error.response.data && error.response.data.message) {
@@ -97,14 +96,12 @@ const handleLogin = async () => {
 
 // Функція для переключення на вікно реєстрації
 const switchToRegister = () => {
-  closeModal(); // Закриваємо вікно логіну
-  emit("open-register"); // Просимо App.vue відкрити вікно реєстрації
+  closeModal();
+  emit("open-register");
 };
 </script>
 
 <style scoped>
-/* Стилі можуть бути такими ж, як у RegisterModal */
-/* Скопіюй стилі з RegisterModal.vue сюди або винеси їх в окремий CSS-файл */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -181,7 +178,7 @@ const switchToRegister = () => {
 }
 .cta-button {
   width: 100%;
-  margin-top: 0.5rem; /* Зі index.css */
+  margin-top: 0.5rem;
   padding: 0.8rem 1.8rem;
   font-size: 1rem;
   font-weight: bold;

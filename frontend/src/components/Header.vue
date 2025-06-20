@@ -1,18 +1,15 @@
 <template>
   <header class="header">
-    <!-- Лого -->
     <div class="logo">
       <img src="./assets/header-logo.png" alt="Restaurant Logo" />
       <h1>SkyRest</h1>
     </div>
-    <!-- Функциональные кнопки -->
     <nav class="nav">
       <button class="nav-button">Меню</button>
       <button class="nav-button">Контакты</button>
       <button class="nav-button">О нас</button>
     </nav>
 
-    <!-- Вход и Регистрация -->
     <div class="auth">
       <button class="auth-button">Вход</button>
       <button class="auth-button">Регистрация</button>
@@ -21,7 +18,6 @@
 </template>
 
 <style scoped>
-/* Структура панели */
 .header {
   display: flex;
   justify-content: space-between;
@@ -32,7 +28,6 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Логотип */
 .logo {
   display: flex;
   align-items: center;
@@ -49,7 +44,6 @@
   color: #2cdede;
 }
 
-/* Навигация */
 .nav {
   display: flex;
   gap: 15px;
@@ -68,7 +62,6 @@
   color: #42b883;
 }
 
-/* Вход и Регистрация */
 .auth {
   display: flex;
   gap: 10px;

@@ -1,10 +1,11 @@
 <template>
-  <div id="app-wrapper">
+  <div id="app-wrapper" :class="{ 'app-background': showAppBackground }">
     <Navbar
       :isLoggedIn="isLoggedIn"
       :currentUser="currentUser"
       @open-register="openRegisterModal"
       @open-login="openLoginModal"
+      @open-cart="openCartModal"
       @logout="handleLogout"
     />
     <main>
@@ -25,27 +26,99 @@
       @login-success="handleSuccessfulLogin"
       @open-register="openRegisterModalFromLogin"
     />
+    <ToastNotification
+      :visible="toast.visible"
+      :message="toast.message"
+      :type="toast.type"
+      @close="hideToast"
+    />
+    <CartModal :isOpen="isCartModalOpen" @close="closeCartModal" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, provide, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import Navbar from "./components/Navbar.vue";
 import Footer from "./components/Footer.vue";
 import RegisterModal from "./components/RegisterModal.vue";
 import LoginModal from "./components/LoginModal.vue";
+import ToastNotification from "./components/ToastNotification.vue";
+import CartModal from "./components/CartModal.vue";
 
-// Стан модального вікна
 const isRegisterModalOpen = ref(false);
 const isLoginModalOpen = ref(false);
-const isLoggedIn = ref(false); // Чи користувач "залогінений"?
-const currentUser = ref(null); // Зберігаємо дані поточного користувача
-const isAuthLoading = ref(true); // Новый флаг для индикации загрузки состояния аутентификации
+const isCartModalOpen = ref(false);
+const isLoggedIn = ref(false);
+const currentUser = ref(null);
+const isAuthLoading = ref(true);
 
-// Отримуємо екземпляр маршрутизатора
-const router = useRouter(); // <--- Ініціалізація useRouter
+const router = useRouter();
+
+const showAppBackground = computed(() => router.name !== "Home");
+
+const toast = reactive({
+  visible: false,
+  message: "",
+  type: "success",
+  timer: null,
+});
+
+const showToast = (message, type = "success", duration = 3500) => {
+  if (toast.timer) {
+    clearTimeout(toast.timer);
+  }
+  toast.message = message;
+  toast.type = type;
+  toast.visible = true;
+  toast.timer = setTimeout(() => {
+    hideToast();
+  }, duration);
+};
+
+const hideToast = () => {
+  if (toast.timer) {
+    clearTimeout(toast.timer);
+    toast.timer = null;
+  }
+  toast.visible = false;
+  setTimeout(() => {
+    toast.message = "";
+    toast.type = "success";
+  }, 500);
+};
+
+const openCartModal = () => {
+  isCartModalOpen.value = true;
+};
+const closeCartModal = () => {
+  isCartModalOpen.value = false;
+};
+
+async function fetchAndSetUser() {
+  console.log("[App.vue] fetchAndSetUser ВИКЛИКАНА!");
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    return;
+  }
+  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  try {
+    const response = await axios.get("http://localhost:5000/api/users/me");
+    currentUser.value = response.data;
+    isLoggedIn.value = true;
+    console.log(
+      "[fetchAndSetUser] Дані користувача оновлено:",
+      currentUser.value,
+    );
+  } catch (error) {}
+}
+
+onMounted(async () => {
+  isAuthLoading.value = true;
+  await fetchAndSetUser();
+  isAuthLoading.value = false;
+});
 
 const openRegisterModal = () => {
   closeLoginModal();
@@ -57,198 +130,126 @@ const closeRegisterModal = () => {
 };
 
 const openLoginModal = () => {
-  closeRegisterModal(); // Закриваємо реєстрацію, якщо вона відкрита
+  closeRegisterModal();
   isLoginModalOpen.value = true;
 };
+
 const closeLoginModal = () => {
   isLoginModalOpen.value = false;
 };
 
-// Вона викликається, коли RegisterModal надсилає подію 'registration-success'
 const handleSuccessfulRegistration = (userData) => {
-  // Сразу логиним после регистрации (без токена, но с данными)
   handleSuccessfulLogin({ token: null, user: userData }, true);
 };
 
-// --- ОБНОВЛЕННАЯ ФУНКЦИЯ ЛОГИНА ---
 const handleSuccessfulLogin = ({ token, user }, isRegistration = false) => {
-  console.log("[Login] Start. Token:", token, "User:", user); // Лог: Начало, полученные данные
+  console.log("[Login] Start. Token:", token, "User:", user);
   currentUser.value = user;
+  console.log(
+    "[Login Handler] currentUser state updated:",
+    JSON.stringify(currentUser.value),
+  );
   isLoggedIn.value = true;
 
   let savedToken = null;
   let savedUserStr = null;
 
   if (token) {
-    console.log("[Login] Токен получен. Пытаюсь сохранить в localStorage...");
+    console.log("[Login] Токен отриман.Сбереження в localStorage...");
     try {
       localStorage.setItem("authToken", token);
-      savedToken = localStorage.getItem("authToken"); // Читаем сразу после записи
-      console.log(
-        "[Login] Результат чтения токена сразу после сохранения:",
-        savedToken ? `(длина ${savedToken.length})` : savedToken,
-      ); // Лог: Проверка записи токена
+      savedToken = localStorage.getItem("authToken");
     } catch (e) {
-      console.error("[Login] ОШИБКА сохранения токена в localStorage:", e);
+      console.error("[Login] Помилка Збереження токена в localStorage:", e);
     }
   } else if (!isRegistration) {
-    console.warn("[Login] Вызван без токена (и это не регистрация).");
   } else {
-    console.log("[Login] Вызван без токена (поток регистрации).");
   }
 
   if (user) {
     console.log(
-      "[Login] Данные пользователя получены. Пытаюсь сохранить в localStorage...",
+      "[Login] Дані користувача отримані.Збереження в localStorage...",
     );
     try {
       const userString = JSON.stringify(user);
       localStorage.setItem("currentUser", userString);
-      savedUserStr = localStorage.getItem("currentUser"); // Читаем сразу после записи
+      savedUserStr = localStorage.getItem("currentUser");
       console.log(
-        "[Login] Результат чтения currentUser сразу после сохранения:",
-        savedUserStr ? `(длина ${savedUserStr.length})` : savedUserStr,
-      ); // Лог: Проверка записи пользователя
+        savedUserStr ? `(довжина ${savedUserStr.length})` : savedUserStr,
+      );
     } catch (e) {
-      console.error("[Login] ОШИБКА сохранения currentUser в localStorage:", e);
+      console.error("", e);
     }
   }
-
-  // Устанавливаем заголовок Axios, если токен был успешно сохранен
   if (savedToken) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
-    console.log("[Login] Заголовок Axios установлен.");
+    console.log("");
   }
 
   closeLoginModal();
   closeRegisterModal();
-
-  if (user && user.id) {
-    console.log(
-      `[Login] Подготовка к перенаправлению на Profile ID: ${user.id}`,
-    );
-    const redirectDelay = isRegistration ? 500 : 0;
-    setTimeout(() => {
-      console.log(`[Login] Выполняю перенаправление на /profile/${user.id}`);
-      router.push({ name: "Profile", params: { id: user.id } });
-    }, redirectDelay);
-  } else {
-    console.error("[Login] Невозможно перенаправить, нет user.id!");
-    router.push({ name: "Home" });
-  }
 };
 
-// --- ОБНОВЛЕННАЯ ФУНКЦИЯ ВЫХОДА ---
 const handleLogout = () => {
-  console.log("[Logout] handleLogout вызвана!"); // Лог: Вызов функции
   isLoggedIn.value = false;
   currentUser.value = null;
   try {
     localStorage.removeItem("authToken");
-    console.log("[Logout] Токен удален из localStorage."); // Лог: Удаление токена
     localStorage.removeItem("currentUser");
-    console.log("[Logout] currentUser удален из localStorage."); // Лог: Удаление пользователя
-  } catch (e) {
-    console.error("[Logout] ОШИБКА при удалении из localStorage:", e);
-  }
+  } catch (e) {}
   delete axios.defaults.headers.common["Authorization"];
-  console.log("[Logout] Заголовок Axios удален.");
   router.push({ name: "Home" });
 };
 
-// --- ОБНОВЛЕННАЯ ФУНКЦИЯ onMounted ---
+provide("currentUser", currentUser);
+provide("updateUserData", fetchAndSetUser);
+provide("isLoggedIn", isLoggedIn);
+provide("openLoginModal", openLoginModal);
+provide("openRegisterModal", openRegisterModal);
+provide("showToast", showToast);
 onMounted(async () => {
   isAuthLoading.value = true;
   let tokenFromStorage = null;
   let storedUserStr = null;
-
-  console.log("------------------------------------");
-  console.log(
-    "[onMounted] Компонент App смонтирован. Начинаю проверку localStorage...",
-  );
-
   try {
     tokenFromStorage = localStorage.getItem("authToken");
-    console.log(
-      `[onMounted] Прочитано из localStorage для 'authToken':`,
-      tokenFromStorage
-        ? `(длина ${tokenFromStorage.length})`
-        : tokenFromStorage,
-    ); // Лог: Чтение токена
     storedUserStr = localStorage.getItem("currentUser");
-    console.log(
-      `[onMounted] Прочитано из localStorage для 'currentUser':`,
-      storedUserStr ? `(длина ${storedUserStr.length})` : storedUserStr,
-    ); // Лог: Чтение пользователя
-  } catch (e) {
-    console.error("[onMounted] ОШИБКА чтения из localStorage:", e);
-  }
+  } catch (e) {}
 
   if (tokenFromStorage) {
-    console.log(
-      "[onMounted] Токен найден. Пытаюсь проверить его через /api/users/me...",
-    );
     axios.defaults.headers.common["Authorization"] =
       `Bearer ${tokenFromStorage}`;
     try {
       const response = await axios.get("http://localhost:5000/api/users/me");
       currentUser.value = response.data;
       isLoggedIn.value = true;
-      console.log(
-        "[onMounted] Пользователь успешно получен с бекенда:",
-        currentUser.value,
-      );
-      // Дополнительно проверим, совпадает ли полученный пользователь с сохраненным (если он был)
       if (storedUserStr) {
         try {
           const storedUserParsed = JSON.parse(storedUserStr);
           if (currentUser.value.id !== storedUserParsed.id) {
-            console.warn(
-              "[onMounted] ID пользователя с бекенда не совпадает с ID в localStorage!",
-            );
-            // Обновляем currentUser в localStorage на всякий случай
             localStorage.setItem(
               "currentUser",
               JSON.stringify(currentUser.value),
             );
           }
-        } catch (e) {
-          /* Ошибка парсинга уже обработана выше */
-        }
+        } catch (e) {}
       } else {
-        // Если токен был, а юзера в сторадже нет - сохраняем полученного
         localStorage.setItem("currentUser", JSON.stringify(currentUser.value));
-        console.log(
-          "[onMounted] Данные пользователя сохранены в localStorage (т.к. отсутствовали).",
-        );
       }
     } catch (error) {
-      console.error(
-        "[onMounted] Ошибка при запросе /api/users/me или токен невалиден:",
-        error.response?.status,
-        error.message,
-      );
-      // Интерцептор axios должен был обработать 401, но на всякий случай чистим состояние
       isLoggedIn.value = false;
       currentUser.value = null;
       localStorage.removeItem("authToken");
       localStorage.removeItem("currentUser");
       delete axios.defaults.headers.common["Authorization"];
-      console.log(
-        "[onMounted] Состояние сброшено из-за ошибки проверки токена.",
-      );
     }
   } else {
     // Токен не найден при загрузке
     isLoggedIn.value = false;
     currentUser.value = null;
-    console.log("[onMounted] Токен не найден в localStorage."); // Это сообщение ты видел
   }
   isAuthLoading.value = false;
-  console.log("[onMounted] Проверка состояния аутентификации завершена.");
-  console.log("------------------------------------");
 });
-// Функції для переключення між модалками
 const openLoginModalFromRegister = () => {
   closeRegisterModal();
   openLoginModal();
@@ -269,7 +270,13 @@ const openRegisterModalFromLogin = () => {
   flex-direction: column;
   min-height: 100vh;
 }
-
+.app-background {
+  background-image: url("assets/background.png");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
 main {
   flex-grow: 1;
 }

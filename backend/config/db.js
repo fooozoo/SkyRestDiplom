@@ -6,7 +6,7 @@ const pool = mysql.createPool({
   user: config.db.user,
   password: config.db.password,
   database: config.db.database,
-  port: config.db.port, // Используем порт из config
+  port: config.db.port, // Порт з кофіга
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -14,19 +14,16 @@ const pool = mysql.createPool({
 async function checkConnection() {
   let connection;
   try {
-    connection = await pool.getConnection(); // Пытаемся получить соединение из пула
+    connection = await pool.getConnection(); // Використовую пулл для отримання підключення
     console.log("Successfully connected to the database.");
   } catch (error) {
     console.error("Error connecting to the database:", error);
-    // Если не удалось подключиться, возможно, стоит завершить приложение
+    // Помилка підключення до ДБ та відключення
     process.exit(1);
   } finally {
-    // Всегда освобождаем соединение после проверки
     if (connection) {
       connection.release();
     }
   }
 }
-
-// Экспортируем пул для использования в других частях приложения
 export { pool, checkConnection };

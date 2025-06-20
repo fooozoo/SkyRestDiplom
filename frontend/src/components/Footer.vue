@@ -19,6 +19,4 @@ import { ref } from "vue";
 const currentYear = ref(new Date().getFullYear());
 </script>
 
-<style scoped>
-/* Стили только для Footer (если нужны) */
-</style>
+<style scoped></style>

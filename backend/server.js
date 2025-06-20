@@ -4,26 +4,26 @@ import config from "./config/index.js";
 import { pool, checkConnection } from "./config/db.js";
 import authRoutes from "./routes/userRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import menuRoutes from "./routes/menuRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import tableRoutes from "./routes/tableRoutes.js";
+import reservationRoutes from "./routes/reservationRoutes.js";
 const app = express();
-// Используем порт сервера из конфигурации
 const PORT = config.server.port;
-
-// --- Middleware (cors, express.json и т.д.) остаются как были ---
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- Маршруты остаются как были ---
 app.get("/", (req, res) => {
   res.send("Hello from backend");
 });
-
-// Підключаємо маршрути автентифікації з префіксом /api/auth
-app.use("/api/auth", authRoutes); // <--- Додай цей рядок
-app.use("/api/users", userRoutes); // <--- Подключаем маршруты пользователя
-// --- Запуск сервера остается как был ---
+app.use("/api/orders", orderRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/menu", menuRoutes);
+app.use("/api/tables", tableRoutes);
+app.use("/api/reservations", reservationRoutes);
 app.listen(PORT, async () => {
   console.log(`Server is running on http://localhost:${PORT}`);
-  // Вызов проверки соединения остается
   await checkConnection();
 });

@@ -11,10 +11,8 @@ export const registerUser = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() }); // Повертаємо помилки валідації
   }
-
   // 2. Отримуємо дані з тіла запиту
   const { username, email, password } = req.body;
-
   try {
     // 3. Перевірка, чи існує користувач з таким email або username
     let connection;
@@ -24,7 +22,6 @@ export const registerUser = async (req, res) => {
         "SELECT email, username FROM users WHERE email = ? OR username = ?",
         [email, username],
       );
-
       if (existingUsers.length > 0) {
         // Перевіряємо, що саме зайнято
         const isEmailTaken = existingUsers.some((user) => user.email === email);
@@ -38,9 +35,8 @@ export const registerUser = async (req, res) => {
 
         return res.status(400).json({ message: errorMessage.trim() });
       }
-
       // 4. Хешування пароля
-      const saltRounds = 10; // Кількість раундів солі (стандартно 10-12)
+      const saltRounds = 10; // Кількість раундів солі
       const passwordHash = await bcrypt.hash(password, saltRounds);
 
       // 5. Збереження нового користувача в БД
@@ -50,7 +46,6 @@ export const registerUser = async (req, res) => {
       );
       const newUserId = result.insertId;
       console.log("User registered successfully:", result.insertId);
-
       // 6. Відповідь про успішну реєстрацію
       res.status(201).json({
         message: "Користувача успішно зареєстровано!",
@@ -74,30 +69,24 @@ export const loginUser = async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
   // 2. Отримуємо дані з тіла запиту
   const { username, password } = req.body;
-
   try {
     let connection;
     try {
       connection = await pool.getConnection();
-
       // 3. Пошук користувача за email
       const [users] = await connection.query(
-        "SELECT id, username, email, password_hash FROM users WHERE username = ?",
+        "SELECT id, username, email, password_hash, created_at, role FROM users WHERE username = ?",
         [username],
       );
-
       // 4. Перевірка, чи знайдено користувача
       if (users.length === 0) {
         return res
           .status(400)
-          .json({ message: "Невірне ім'я користувача або пароль" }); // Загальна помилка для безпеки
+          .json({ message: "Невірне ім'я користувача або пароль" }); // Загальна помилка
       }
-
       const user = users[0];
-
       // 5. Перевірка пароля
       const isMatch = await bcrypt.compare(password, user.password_hash);
       if (!isMatch) {
@@ -105,28 +94,26 @@ export const loginUser = async (req, res) => {
           .status(400)
           .json({ message: "Невірне ім'я користувача або пароль" }); // Загальна помилка
       }
-
       // 6. Пароль вірний - Створення JWT токену
       const payload = {
         user: {
           id: user.id,
           username: user.username, // Можна додати інші дані, які не є секретними
+          role: user.role,
         },
       };
-
       // Перевіряємо, чи є секретний ключ в .env
       if (!process.env.JWT_SECRET) {
         console.error("FATAL ERROR: JWT_SECRET is not defined.");
         return res.status(500).send("Помилка сервера (конфігурація)");
       }
-
       jwt.sign(
         payload,
         process.env.JWT_SECRET,
-        { expiresIn: "1d" }, // Токен дійсний 7 днів (можна '1h', '30d' тощо)
+        { expiresIn: "1d" }, // Токен дійсний 1 день
         (err, token) => {
           if (err) throw err;
-          // 7. Відправляємо токен та дані користувача (без хешу пароля!)
+          // 7. Відправляємо токен та дані користувача
           res.json({
             message: "Вхід успішний!",
             token,
@@ -134,6 +121,9 @@ export const loginUser = async (req, res) => {
               id: user.id,
               username: user.username,
               email: user.email,
+              created_at: user.created_at,
+              avatar: user.avatar,
+              role: user.role,
             },
           });
         },

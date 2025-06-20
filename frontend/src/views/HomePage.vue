@@ -15,15 +15,15 @@
         <h2>Про Ресторан</h2>
         <p>
           SkyRest - це унікальне місце, де висока кухня зустрічається із
-          захоплюючими краєвидами. Ми пропонуємо...
+          захоплюючими краєвидами.
         </p>
       </div>
     </section>
 
     <section class="content-section" style="background-color: #e9ecef">
       <div class="container">
-        <h2>Популярні страви</h2>
-        <p>Тут будуть картки із зображеннями та описами декількох страв...</p>
+        <h2>Переглянути меню</h2>
+        <p></p>
         <div style="text-align: center; margin-top: 2rem">
           <router-link
             to="/menu"
@@ -52,10 +52,6 @@
   </div>
 </template>
 
-<script setup>
-// Скриптова частина залишається без змін
-</script>
+<script setup></script>
 
-<style scoped>
-/* Стилі залишаються без змін */
-</style>
+<style scoped></style>

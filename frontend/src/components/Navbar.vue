@@ -30,6 +30,28 @@
               <button @click="logout" class="navbar-button-link">Вийти</button>
             </li>
           </template>
+          <li>
+            <button
+              @click="openCartModal"
+              class="navbar-button-link cart-button"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="20px"
+                height="20px"
+                style="margin-bottom: -4px"
+              >
+                <path
+                  d="M17.21 9l-4.38-6.56a1 1 0 00-1.66 0L6.79 9H2a1 1 0 00-.96.72l-2 9A1 1 0 00.02 20H24a1 1 0 00.98-1.28l-2-9A1 1 0 0022 9h-4.79zM9 9l3-4.5L15 9H9zm3 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"
+                ></path>
+              </svg>
+              <span v-if="cartStore.itemCount > 0" class="cart-count">{{
+                cartStore.itemCount
+              }}</span>
+            </button>
+          </li>
         </ul>
       </div>
     </div>
@@ -37,42 +59,68 @@
 </template>
 
 <script setup>
-// ---> ОТРИМУЄМО ПРОПСИ <---
+import { useCartStore } from "../stores/cart";
+
 const props = defineProps({
   isLoggedIn: {
     type: Boolean,
     required: true,
   },
   currentUser: {
-    // Може бути об'єктом { id, username, ... } або null
     type: Object,
-    default: null, // Значення за замовчуванням, якщо не передано
+    default: null,
   },
 });
-// ---> ВИЗНАЧАЄМО ПОДІЇ <---
 // Подія для відкриття модалки реєстрації
 // Подія для виконання виходу
-const emit = defineEmits(["open-register", "logout", "open-login"]);
+const emit = defineEmits([
+  "open-register",
+  "logout",
+  "open-login",
+  "open-cart",
+]);
+
+const cartStore = useCartStore();
 
 const openRegisterModal = () => {
   emit("open-register");
 };
 
-// ---> ФУНКЦІЯ ДЛЯ ВИХОДУ <---
 const logout = () => {
-  emit("logout"); // Сигнал батьківському компоненту App.vue
+  emit("logout");
 };
 const openLoginModal = () => {
   emit("open-login");
 };
+const openCartModal = () => {
+  emit("open-cart");
+};
 </script>
 
 <style scoped>
-/* ... (попередні стилі) ... */
+.cart-button {
+  position: relative;
+  padding: 5px;
+}
 
-.router-link-exact-active {
-  color: #64ffda;
+.cart-count {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 5px;
+  font-size: 0.7rem;
   font-weight: bold;
+  line-height: 1;
+  min-width: 16px;
+  text-align: center;
+  border: 1px solid #0a192f;
+}
+
+.navbar-button-link svg {
+  vertical-align: middle;
 }
 
 .navbar-button-link {
