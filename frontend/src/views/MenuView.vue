@@ -390,4 +390,63 @@ onMounted(fetchMenuItems);
   visibility: hidden;
   pointer-events: none;
 }
+@media (max-width: 768px) {
+  .menu-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .category-nav {
+    position: static;
+    width: auto;
+    top: auto;
+    margin-bottom: 2rem;
+    border: none;
+    background-color: transparent;
+    padding: 0;
+  }
+
+  .category-nav h4 {
+    text-align: left;
+    border-bottom: none;
+    font-size: 1.3rem;
+  }
+
+  .category-nav ul {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .category-nav ul::-webkit-scrollbar {
+    height: 4px;
+  }
+  .category-nav ul::-webkit-scrollbar-thumb {
+    background-color: #64ffda;
+    border-radius: 2px;
+  }
+
+  .category-nav li {
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .category-nav a {
+    border: 1px solid #dee2e6;
+  }
+
+  .menu-page h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  :deep(.carousel__prev) {
+    left: 0px;
+  }
+
+  :deep(.carousel__next) {
+    right: 0px;
+  }
+}
 </style>

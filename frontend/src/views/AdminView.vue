@@ -588,4 +588,47 @@ onMounted(fetchExistingItems);
   border-color: #dc3545;
   color: white;
 }
+media (max-width: 768px) {
+  .admin-sections section {
+    padding: 1rem; /* Уменьшаем внутренние отступы секции */
+  }
+
+  /* Выстраиваем поля формы в одну колонку */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .add-menu-item-form {
+    padding: 1rem;
+  }
+
+  /* Это самая важная часть: делаем таблицу прокручиваемой */
+  .items-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto; /* Включаем горизонтальный скролл */
+    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+  }
+
+  .items-table th,
+  .items-table td {
+    white-space: nowrap; /* Запрещаем перенос текста в ячейках */
+  }
+
+  /* Располагаем кнопки "Редагувати" и "Видалити" друг под другом */
+  .items-table td:last-child {
+    white-space: normal;
+    min-width: 120px; /* Задаем минимальную ширину колонки с кнопками */
+  }
+
+  .action-button {
+    display: block; /* Растягиваем кнопки на всю ширину ячейки */
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .action-button:last-child {
+    margin-bottom: 0;
+  }
+}
 </style>

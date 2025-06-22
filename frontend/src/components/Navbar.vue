@@ -2,19 +2,40 @@
   <nav class="navbar">
     <div class="container">
       <router-link to="/" class="navbar-logo">SkyRest</router-link>
-      <div class="navbar-links">
+      <button class="hamburger-button" @click="isMenuOpen = !isMenuOpen">
+        ☰
+      </button>
+      <div class="navbar-links" :class="{ 'is-open': isMenuOpen }">
         <ul>
-          <li><router-link to="/">Головна</router-link></li>
-          <li><router-link to="/menu">Меню</router-link></li>
-          <li><router-link to="/reservations">Резервації</router-link></li>
+          <li>
+            <router-link to="/" @click="isMenuOpen = false"
+              >Головна</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/menu" @click="isMenuOpen = false"
+              >Меню</router-link
+            >
+          </li>
+          <li>
+            <router-link to="/reservations" @click="isMenuOpen = false"
+              >Резервації</router-link
+            >
+          </li>
           <template v-if="!isLoggedIn">
             <li>
-              <button @click="openLoginModal" class="navbar-button-link">
+              <button
+                @click="closeMenuAndEmit('open-login')"
+                class="navbar-button-link"
+              >
                 Вхід
               </button>
             </li>
             <li>
-              <button @click="openRegisterModal" class="navbar-button-link">
+              <button
+                @click="closeMenuAndEmit('open-register')"
+                class="navbar-button-link"
+              >
                 Реєстрація
               </button>
             </li>
@@ -23,16 +44,22 @@
             <li v-if="currentUser && currentUser.id">
               <router-link
                 :to="{ name: 'Profile', params: { id: currentUser.id } }"
+                @click="isMenuOpen = false"
                 >Профіль</router-link
               >
             </li>
             <li>
-              <button @click="logout" class="navbar-button-link">Вийти</button>
+              <button
+                @click="closeMenuAndEmit('logout')"
+                class="navbar-button-link"
+              >
+                Вийти
+              </button>
             </li>
           </template>
           <li>
             <button
-              @click="openCartModal"
+              @click="closeMenuAndEmit('open-cart')"
               class="navbar-button-link cart-button"
             >
               <svg
@@ -60,6 +87,9 @@
 
 <script setup>
 import { useCartStore } from "../stores/cart";
+import { ref } from "vue";
+
+const isMenuOpen = ref(false);
 
 const props = defineProps({
   isLoggedIn: {
@@ -72,7 +102,6 @@ const props = defineProps({
   },
 });
 // Подія для відкриття модалки реєстрації
-// Подія для виконання виходу
 const emit = defineEmits([
   "open-register",
   "logout",
@@ -81,6 +110,13 @@ const emit = defineEmits([
 ]);
 
 const cartStore = useCartStore();
+
+const closeMenuAndEmit = (eventName) => {
+  if (eventName) {
+    emit(eventName);
+  }
+  isMenuOpen.value = false;
+};
 
 const openRegisterModal = () => {
   emit("open-register");
@@ -98,6 +134,9 @@ const openCartModal = () => {
 </script>
 
 <style scoped>
+.navbar {
+  position: relative;
+}
 .cart-button {
   position: relative;
   padding: 5px;
@@ -137,5 +176,49 @@ const openCartModal = () => {
 
 .navbar-button-link:hover {
   color: #64ffda;
+}
+.hamburger-button {
+  display: none;
+  background: none;
+  border: none;
+  color: #ccd6f6;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .navbar .container {
+    justify-content: space-between;
+  }
+
+  .navbar-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #0a192f;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+  }
+
+  .navbar-links.is-open {
+    display: flex;
+  }
+
+  .navbar-links ul {
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+  }
+
+  .navbar-links li {
+    margin: 0.5rem 0;
+  }
+
+  .hamburger-button {
+    display: block;
+  }
 }
 </style>

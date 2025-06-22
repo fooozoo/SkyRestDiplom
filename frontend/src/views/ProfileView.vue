@@ -698,4 +698,65 @@ const toggleReservations = () => {
   border-radius: 3px;
   border: 1px solid #eee;
 }
+@media (max-width: 768px) {
+  .profile-page h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-header,
+  .profile-details,
+  .profile-actions {
+    padding: 1.5rem 1rem;
+  }
+
+  .profile-header h3 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0.75rem 0;
+  }
+
+  .detail-value {
+    text-align: left;
+    font-weight: bold;
+    color: #0a192f;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .profile-actions .cta-button,
+  .profile-actions a.cta-button {
+    margin: 0;
+    text-align: center;
+  }
+
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .order-body,
+  .order-footer {
+    padding: 1rem;
+  }
+
+  .order-item-li {
+    gap: 0.5rem;
+  }
+
+  .order-item-li span:nth-child(3) {
+    display: none;
+  }
+}
 </style>

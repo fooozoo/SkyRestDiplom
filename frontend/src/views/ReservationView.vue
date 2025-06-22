@@ -583,4 +583,50 @@ const getTableClasses = (table) => {
   box-shadow: none;
   transform: none;
 }
+@media (max-width: 768px) {
+  .reservation-page h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Выстраиваем контролы в колонку */
+  .reservation-controls {
+    flex-direction: column;
+    align-items: stretch; /* Растягиваем элементы на всю ширину */
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  /* Убеждаемся, что инпуты занимают всю доступную ширину */
+  .reservation-controls .form-group input {
+    width: 100%;
+    box-sizing: border-box; /* Важно, чтобы padding не ломал сетку */
+  }
+
+  .tables-layout {
+    padding: 1rem 0.5rem;
+  }
+
+  .tables-grid {
+    gap: 0.75rem; /* Уменьшаем расстояние между столиками */
+  }
+
+  .table-group h4 {
+    font-size: 1.2rem;
+  }
+
+  .reservation-confirm {
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .reservation-confirm p {
+    font-size: 1rem;
+    /* Если нужно, можно сделать текст и кнопку в столбик */
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: center; */
+    /* gap: 1rem; */
+  }
+}
 </style>
