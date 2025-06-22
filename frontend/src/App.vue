@@ -188,7 +188,9 @@ const handleSuccessfulLogin = ({ token, user }, isRegistration = false) => {
     axios.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
     console.log("");
   }
-
+  if (user && user.id) {
+    router.push({ name: "Profile", params: { id: user.id } });
+  }
   closeLoginModal();
   closeRegisterModal();
 };

@@ -107,7 +107,7 @@
               </p>
               <p><strong>Кількість гостей:</strong> {{ res.party_size }}</p>
             </div>
-            <div class="order-footer">...</div>
+            <div class="order-footer"></div>
           </div>
         </div>
         <div v-else>
@@ -143,7 +143,7 @@
               >
               <span>Дата: {{ formatDateTime(order.order_time) }}</span>
             </div>
-            <
+
             <div class="order-body">
               <p><strong>Адреса:</strong> {{ order.delivery_address }}</p>
               <div
