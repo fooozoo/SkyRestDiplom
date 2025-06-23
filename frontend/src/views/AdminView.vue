@@ -251,7 +251,7 @@ const confirmDeletion = async () => {
   showConfirmModal.value = false;
 
   try {
-    const apiUrl = `<span class="math-inline">\{import\.meta\.env\.VITE\_API\_URL\}/api/menu/</span>{id}`;
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/menu/${id}`;
     await axios.delete(apiUrl);
     showToast(`Страва "${name}" видалена.`, "success");
     existingItems.value = existingItems.value.filter((item) => item.id !== id);
