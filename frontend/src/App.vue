@@ -37,7 +37,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, provide, reactive, computed } from "vue";
+import {
+  ref,
+  onMounted,
+  provide,
+  reactive,
+  computed,
+  onUnmounted,
+  watch,
+} from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import Navbar from "./components/Navbar.vue";
@@ -63,6 +71,45 @@ const toast = reactive({
   message: "",
   type: "success",
   timer: null,
+});
+
+const unreadCount = ref(0); // Стан для зберігання кількості непрочитаних сповіщень
+let pollingInterval = null; // Змінна для зберігання ID нашого інтервалу
+
+const fetchUnreadCount = async () => {
+  if (isLoggedIn.value && currentUser.value?.role === "admin") {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/notifications/unread-count`,
+      );
+      unreadCount.value = response.data.unreadCount;
+    } catch (error) {
+      console.error("Не вдалося отримати кількість сповіщень:", error);
+    }
+  }
+};
+watch(
+  currentUser,
+  (newUser) => {
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+      pollingInterval = null;
+    }
+
+    if (newUser?.role === "admin") {
+      fetchUnreadCount();
+      pollingInterval = setInterval(fetchUnreadCount, 5000);
+    } else {
+      unreadCount.value = 0;
+    }
+  },
+  { immediate: true },
+);
+
+onUnmounted(() => {
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+  }
 });
 
 const showToast = (message, type = "success", duration = 3500) => {
@@ -205,7 +252,7 @@ const handleLogout = () => {
   delete axios.defaults.headers.common["Authorization"];
   router.push({ name: "Home" });
 };
-
+provide("unreadCount", unreadCount);
 provide("currentUser", currentUser);
 provide("updateUserData", fetchAndSetUser);
 provide("isLoggedIn", isLoggedIn);
@@ -251,7 +298,6 @@ onMounted(async () => {
       delete axios.defaults.headers.common["Authorization"];
     }
   } else {
-    // Токен не найден при загрузке
     isLoggedIn.value = false;
     currentUser.value = null;
   }

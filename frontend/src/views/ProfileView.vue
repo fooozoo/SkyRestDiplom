@@ -582,11 +582,6 @@ const toggleReservations = () => {
   font-size: 0.9rem !important;
 }
 
-.upload-error {
-  color: #dc3545;
-  font-size: 0.85em;
-  margin-top: 0.5rem;
-}
 .order-history-section {
   margin-top: 3rem;
   padding-top: 2rem;
@@ -628,14 +623,11 @@ const toggleReservations = () => {
   color: #007bff;
   font-weight: bold;
 }
-.status-в-обробці {
-  color: #ffc107;
-  font-weight: bold;
-}
-.status-доставлено {
+.status-підтверджено {
   color: #28a745;
   font-weight: bold;
 }
+
 .status-скасовано {
   color: #dc3545;
   font-weight: bold;

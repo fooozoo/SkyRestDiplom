@@ -3,26 +3,21 @@ import { validationResult } from "express-validator";
 const RESERVATION_DURATION_MINUTES = 120;
 
 const createReservation = async (req, res) => {
-  // 1. Перевірка помилок валідації
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  // 2. Отримуємо ID користувача з токену
   const userId = req.user?.id;
   if (!userId) {
     return res.status(401).json({ message: "Користувач не авторизований." });
   }
-  // 3. Отримуємо дані з тіла запиту
   const { table_id, reservation_date, reservation_time, party_size } = req.body;
-  // Формуємо повну дату-час резервації
   const reservationDateTime = `${reservation_date} ${reservation_time}:00`;
 
   let connection;
   try {
     connection = await pool.getConnection();
-    await connection.beginTransaction(); // Починаємо транзакцію
-    // 4. Перевірка місткості столика
+    await connection.beginTransaction();
     const [tables] = await connection.query(
       "SELECT capacity FROM tables WHERE id = ? AND is_active = TRUE",
       [table_id],
@@ -40,7 +35,6 @@ const createReservation = async (req, res) => {
       });
     }
 
-    // 5. ПОВТОРНА ПЕРЕВІРКА ДОСТУПНОСТІ
     const availabilityQuery = `
             SELECT table_id
             FROM reservations
@@ -63,7 +57,6 @@ const createReservation = async (req, res) => {
       params,
     );
     if (conflictingReservations.length > 0) {
-      // Якщо знайдено конфліктуючу резервацію - відкочуємо транзакцію
       await connection.rollback();
       console.warn(
         `Booking conflict detected for table ${table_id} at ${reservationDateTime}`,
@@ -74,32 +67,28 @@ const createReservation = async (req, res) => {
       });
     }
 
-    // 6. Якщо столик вільний - створюємо резервацію
     const insertQuery = `INSERT INTO reservations (user_id, table_id, reservation_datetime, party_size, status) VALUES (?, ?, ?, ?, ?)`;
     const insertValues = [
       userId,
       table_id,
       reservationDateTime,
       party_size,
-      "Підтверджено",
-    ]; // Статус 'Підтверджено'
+      "Очікує",
+    ];
 
     const [result] = await connection.query(insertQuery, insertValues);
     const newReservationId = result.insertId;
 
-    // 7. Підтверджуємо транзакцію
     await connection.commit();
     console.log(
       `Reservation created successfully. ID: ${newReservationId} for user ${userId}`,
     );
 
-    // 8. Відправляємо успішну відповідь
     res.status(201).json({
       message: "Столик успішно зарезервовано!",
       reservationId: newReservationId,
     });
   } catch (error) {
-    // Відкочуємо транзакцію у випадку будь-якої помилки
     if (connection) await connection.rollback();
     console.error(`Error creating reservation for user ${userId}:`, error);
     res.status(500).json({
@@ -110,7 +99,6 @@ const createReservation = async (req, res) => {
   }
 };
 const getMyReservations = async (req, res) => {
-  // ID користувача з токену
   const userId = req.user?.id;
   if (!userId) {
     return res.status(401).json({ message: "Користувач не авторизований." });
@@ -119,8 +107,6 @@ const getMyReservations = async (req, res) => {
   let connection;
   try {
     connection = await pool.getConnection();
-    // Отримуємо резервації для користувача, приєднуємо назву столика
-    // Сортуємо від найновіших до найстаріших
     const [reservations] = await connection.query(
       `SELECT
                r.id, r.table_id, r.reservation_datetime,
@@ -144,4 +130,49 @@ const getMyReservations = async (req, res) => {
     if (connection) connection.release();
   }
 };
-export { createReservation, getMyReservations };
+const confirmReservation = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await pool.query(
+      "UPDATE reservations SET status = 'Підтверджено', is_viewed_by_admin = 1 WHERE id = ? AND status = 'Очікує'",
+      [id],
+    );
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ message: "Резервацію не знайдено або вона вже оброблена." });
+    }
+    res.status(200).json({ message: `Резервацію №${id} підтверджено.` });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Помилка сервера при підтвердженні резервації." });
+  }
+};
+
+const cancelReservation = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await pool.query(
+      "UPDATE reservations SET status = 'Скасовано', is_viewed_by_admin = 1 WHERE id = ? AND status = 'Очікує'",
+      [id],
+    );
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ message: "Резервацію не знайдено або вона вже оброблена." });
+    }
+    res.status(200).json({ message: `Резервацію №${id} скасовано.` });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Помилка сервера при скасуванні резервації." });
+  }
+};
+
+export {
+  createReservation,
+  getMyReservations,
+  confirmReservation,
+  cancelReservation,
+};

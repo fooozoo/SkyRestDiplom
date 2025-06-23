@@ -8,6 +8,7 @@ import menuRoutes from "./routes/menuRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import tableRoutes from "./routes/tableRoutes.js";
 import reservationRoutes from "./routes/reservationRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 const app = express();
 const PORT = config.server.port;
 app.use(cors());
@@ -23,6 +24,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/tables", tableRoutes);
 app.use("/api/reservations", reservationRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.listen(PORT, async () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   await checkConnection();

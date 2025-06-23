@@ -56,6 +56,140 @@
                 Вийти
               </button>
             </li>
+            <li v-if="currentUser?.role === 'admin'" class="notification-item">
+              <button
+                @click="toggleNotificationMenu"
+                class="navbar-button-link notification-bell"
+              >
+                <span class="bell-icon">🔔</span>
+                <span v-if="unreadCount > 0" class="notification-badge">{{
+                  unreadCount
+                }}</span>
+              </button>
+
+              <div v-if="isNotificationMenuOpen" class="notification-dropdown">
+                <div class="notification-header">
+                  Сповіщення для адміністратора
+                </div>
+                <div v-if="isLoadingNotifications" class="notification-content">
+                  Завантаження...
+                </div>
+                <ul
+                  v-else-if="notifications.length > 0"
+                  class="notification-list"
+                >
+                  <li
+                    v-for="notif in notifications"
+                    :key="`${notif.type}-${notif.id}`"
+                    class="notification-list-item"
+                  >
+                    <div class="notification-main">
+                      <div class="notification-text">
+                        <strong v-if="notif.type === 'order'"
+                          >Нове замовлення №{{ notif.id }}</strong
+                        >
+                        <strong v-if="notif.type === 'reservation'"
+                          >Нова резервація №{{ notif.id }}</strong
+                        >
+
+                        <div class="notification-details">
+                          <div v-if="notif.type === 'order'">
+                            <div class="notification-line">
+                              <span>Склад:</span> {{ notif.items_preview }}
+                            </div>
+                            <div class="notification-line">
+                              <span>Адреса:</span>
+                              <strong>{{ notif.delivery_address }}</strong>
+                            </div>
+                            <div
+                              v-if="notif.customer_comment"
+                              class="notification-line"
+                            >
+                              <span>Коментар:</span>
+                              <em>{{ notif.customer_comment }}</em>
+                            </div>
+                          </div>
+
+                          <div v-if="notif.type === 'reservation'">
+                            <div class="notification-line">
+                              <span>Стіл:</span>
+                              <strong>{{ notif.table_name }}</strong>
+                            </div>
+                            <div class="notification-line">
+                              <span>На:</span>
+                              <strong>{{
+                                formatFullDateTime(notif.reservation_datetime)
+                              }}</strong>
+                            </div>
+                            <div class="notification-line">
+                              <span>К-сть:</span>
+                              <strong
+                                >{{ notif.party_size }}
+                                {{ pluralizePeople(notif.party_size) }}</strong
+                              >
+                            </div>
+                          </div>
+
+                          <div class="notification-line">
+                            <span>Від:</span> {{ notif.username }} - о
+                            {{
+                              formatNotificationTime(
+                                notif.order_time || notif.reservation_datetime,
+                              )
+                            }}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        @click.stop="
+                          toggleActionMenu(`${notif.type}-${notif.id}`)
+                        "
+                        class="actions-button"
+                      >
+                        ⋮
+                      </button>
+                    </div>
+                    <div
+                      v-if="openedActionMenu === `${notif.type}-${notif.id}`"
+                      class="actions-menu"
+                    >
+                      <button
+                        v-if="notif.type === 'order'"
+                        @click="handleConfirmOrder(notif)"
+                        class="action-item action-item-confirm"
+                      >
+                        Підтвердити
+                      </button>
+                      <button
+                        v-if="notif.type === 'order'"
+                        @click="handleCancelOrder(notif)"
+                        class="action-item action-item-cancel"
+                      >
+                        Скасувати замовлення
+                      </button>
+                      <button
+                        v-if="notif.type === 'reservation'"
+                        @click="handleConfirmReservation(notif)"
+                        class="action-item action-item-confirm"
+                      >
+                        Підтвердити резервацію
+                      </button>
+                      <button
+                        v-if="notif.type === 'reservation'"
+                        @click="handleCancelReservation(notif)"
+                        class="action-item action-item-cancel"
+                      >
+                        Скасувати резервацію
+                      </button>
+                    </div>
+                  </li>
+                </ul>
+                <div v-else class="notification-content">
+                  Нових сповіщень немає.
+                </div>
+              </div>
+            </li>
           </template>
           <li>
             <button
@@ -87,7 +221,42 @@
 
 <script setup>
 import { useCartStore } from "../stores/cart";
-import { ref } from "vue";
+import { ref, inject } from "vue";
+import axios from "axios";
+
+const unreadCount = inject("unreadCount", ref(0));
+const isNotificationMenuOpen = ref(false);
+const notifications = ref([]);
+const isLoadingNotifications = ref(false);
+
+const showToast = inject("showToast", (msg, type) =>
+  console.warn(`Toast: ${type}-${msg}`),
+);
+
+const toggleNotificationMenu = async () => {
+  isNotificationMenuOpen.value = !isNotificationMenuOpen.value;
+  if (isNotificationMenuOpen.value && unreadCount.value > 0) {
+    isLoadingNotifications.value = true;
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/notifications/unread`,
+      );
+      notifications.value = response.data;
+
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/notifications/mark-as-read`,
+      );
+
+      unreadCount.value = 0;
+    } catch (error) {
+      console.error("Не вдалося завантажити сповіщення:", error);
+    } finally {
+      isLoadingNotifications.value = false;
+    }
+  } else if (isNotificationMenuOpen.value) {
+    notifications.value = [];
+  }
+};
 
 const isMenuOpen = ref(false);
 
@@ -101,7 +270,6 @@ const props = defineProps({
     default: null,
   },
 });
-// Подія для відкриття модалки реєстрації
 const emit = defineEmits([
   "open-register",
   "logout",
@@ -118,18 +286,102 @@ const closeMenuAndEmit = (eventName) => {
   isMenuOpen.value = false;
 };
 
-const openRegisterModal = () => {
-  emit("open-register");
+const openedActionMenu = ref(null);
+
+const toggleActionMenu = (notificationId) => {
+  if (openedActionMenu.value === notificationId) {
+    openedActionMenu.value = null;
+  } else {
+    openedActionMenu.value = notificationId;
+  }
 };
 
-const logout = () => {
-  emit("logout");
+const handleConfirmOrder = async (orderToConfirm) => {
+  try {
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/orders/${orderToConfirm.id}/confirm`;
+    await axios.post(apiUrl);
+
+    showToast(`Замовлення №${orderToConfirm.id} підтверджено!`, "success");
+
+    const confirmedNotif = notifications.value.find(
+      (n) => n.id === orderToConfirm.id && n.type === "order",
+    );
+    if (confirmedNotif) {
+      confirmedNotif.status = "Підтверджено";
+    }
+    openedActionMenu.value = null;
+  } catch (error) {
+    showToast("Помилка підтвердження замовлення.", "error");
+    console.error("Error confirming order:", error);
+  }
 };
-const openLoginModal = () => {
-  emit("open-login");
+const handleCancelOrder = async (orderToCancel) => {
+  try {
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/orders/${orderToCancel.id}/cancel`;
+    await axios.post(apiUrl);
+
+    showToast(`Замовлення №${orderToCancel.id} скасовано.`, "info");
+
+    notifications.value = notifications.value.filter(
+      (n) => n.id !== orderToCancel.id || n.type !== "order",
+    );
+    openedActionMenu.value = null;
+  } catch (error) {
+    showToast("Помилка скасування замовлення.", "error");
+    console.error("Error canceling order:", error);
+  }
 };
-const openCartModal = () => {
-  emit("open-cart");
+const handleConfirmReservation = async (reservation) => {
+  try {
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/reservations/${reservation.id}/confirm`;
+    await axios.post(apiUrl);
+    showToast(`Резервацію №${reservation.id} підтверджено!`, "success");
+    notifications.value = notifications.value.filter(
+      (n) => n.id !== reservation.id || n.type !== "reservation",
+    );
+    openedActionMenu.value = null;
+  } catch (error) {
+    showToast("Помилка підтвердження резервації.", "error");
+    console.error("Error confirming reservation:", error);
+  }
+};
+
+const handleCancelReservation = async (reservation) => {
+  try {
+    const apiUrl = `${import.meta.env.VITE_API_URL}/api/reservations/${reservation.id}/cancel`;
+    await axios.post(apiUrl);
+    showToast(`Резервацію №${reservation.id} скасовано.`, "info");
+    notifications.value = notifications.value.filter(
+      (n) => n.id !== reservation.id || n.type !== "reservation",
+    );
+    openedActionMenu.value = null;
+  } catch (error) {
+    showToast("Помилка скасування резервації.", "error");
+    console.error("Error canceling reservation:", error);
+  }
+};
+const formatNotificationTime = (dateString) => {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleTimeString("uk-UA", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+const pluralizePeople = (count) => {
+  if (count === 1) return "людина";
+  if (count > 1 && count < 5) return "людини";
+  return "людей";
+};
+
+const formatFullDateTime = (dateString) => {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleString("uk-UA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 </script>
 
@@ -220,5 +472,127 @@ const openCartModal = () => {
   .hamburger-button {
     display: block;
   }
+}
+.notification-item {
+  position: relative;
+}
+
+.notification-bell {
+  position: relative;
+  font-size: 1.5rem;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  line-height: 1;
+  border: 2px solid #0a192f;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 150%;
+  right: 0;
+  width: 300px;
+  background-color: #f8f9fa;
+  color: #212529;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1100;
+  border: 1px solid #dee2e6;
+  text-align: left;
+}
+
+.notification-header {
+  padding: 0.75rem 1rem;
+  font-weight: bold;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.notification-content {
+  padding: 1rem;
+  color: #6c757d;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-list-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.notification-list-item:last-child {
+  border-bottom: none;
+}
+.notification-list-item {
+  padding: 0;
+}
+.notification-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+.notification-details {
+  font-size: 0.8em;
+  color: #6c757d;
+  margin-top: 4px;
+}
+.actions-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0 0.5rem;
+}
+.actions-menu {
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  padding: 0.5rem 0;
+}
+.action-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.action-item:hover {
+  background-color: #f0f0f0;
+}
+.notification-details {
+  font-size: 0.8em;
+  color: #6c757d;
+  margin-top: 5px;
+}
+.notification-line {
+  margin-top: 3px;
+  white-space: normal;
+}
+.notification-line span {
+  color: #343a40;
+}
+.notification-line em {
+  color: #555;
+  font-style: italic;
 }
 </style>
